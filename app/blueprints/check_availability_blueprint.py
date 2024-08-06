@@ -25,16 +25,15 @@ def check_availability():
         piecesm2 = tile_data['piecesm2']
         locations = tile_data['locations']
         piecesweight = tile_data['weight']
-        selling_unit = tile_data['sellingunit']     # this is irrelevant, for anything other than sqm has to see piecesm2. if piecesm2 = 0, treat as pieces.
         if tile_data['hasshades'] == True:
             shades = [
                 {
                     "shade": loc['shade'].split('*')[0],
-                    "available in pieces": available,
-                    "available in sqm": round(available / piecesm2, 4) if selling_unit == "SQM" else None,
-                    "info pieces / box": pcsbox,
-                    "info m2 / box": round(pcsbox / piecesm2, 4) if selling_unit == "SQM" else None,
-                    "info weight per box in kg": pcsbox * piecesweight
+                    "pcsavail": available,
+                    "sqmavail": round(available / piecesm2, 4) if piecesm2 else None,
+                    "pcsbox": pcsbox,
+                    "sqmbox": round(pcsbox / piecesm2, 4) if piecesm2 else None,
+                    "boxweight": pcsbox * piecesweight
                 }
                 for loc in locations
                 for available, pcsbox in [(loc['available'], loc['pcsbox'])]
@@ -44,18 +43,17 @@ def check_availability():
 
         backorder = [
             {
-                "quantity ordered (unit is according to selling unit)": data['Qty'],
-                "date expected": data['Date']
+                "backorderqty": data['Qty'],
+                "backordereta": data['Date']
             } for data in eta_data
         ]
 
         output = {
             'name': name,
-            'pieces/m2': piecesm2,
-            'weight per piece (in kg)': piecesweight,
-            'quantity Available': shades,
+            'pcssqm': piecesm2,
+            'pcsweight': piecesweight,
+            'available': shades,
             'backorder': backorder,
-            'selling unit': selling_unit
         }
         if name == None:
             return jsonify({"error": "empty payload"})
