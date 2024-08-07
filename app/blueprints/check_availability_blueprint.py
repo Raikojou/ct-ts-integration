@@ -49,6 +49,7 @@ def check_availability():
         ]
 
         output = {
+            'sku': tile_data['code'],
             'name': name,
             'pcssqm': piecesm2,
             'pcsweight': piecesweight,
