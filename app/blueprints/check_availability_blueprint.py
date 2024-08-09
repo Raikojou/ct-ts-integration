@@ -24,16 +24,25 @@ def check_availability():
         name = tile_data['description']
         piecesm2 = tile_data['piecesm2']
         locations = tile_data['locations']
-        piecesweight = tile_data['weight']
+        piecesweight = round(tile_data['weight'], 2)
+
+        
+        additional_details = {
+            item['name']: item['value']
+            for item in tile_data['extradetails']['userdefinedvalues']
+            if item['value'] is not ""
+        }
+
         if tile_data['hasshades'] == True:
             shades = [
                 {
                     "shade": loc['shade'].split('*')[0],
                     "pcsavail": available,
                     "sqmavail": round(available / piecesm2, 4) if piecesm2 else None,
+                    "boxpallet": loc['boxpallet'],
                     "pcsbox": pcsbox,
                     "sqmbox": round(pcsbox / piecesm2, 4) if piecesm2 else None,
-                    "boxweight": pcsbox * piecesweight
+                    "boxweight": round(pcsbox * piecesweight, 2)
                 }
                 for loc in locations
                 for available, pcsbox in [(loc['available'], loc['pcsbox'])]
@@ -50,16 +59,17 @@ def check_availability():
 
         output = {
             'sku': tile_data['code'],
+            'sellingunit': tile_data['sellingunit'].lower(),
             'name': name,
             'pcssqm': piecesm2,
             'pcsweight': piecesweight,
             'available': shades,
             'backorder': backorder,
+            'details': additional_details
         }
         if name == None:
             return jsonify({"error": "empty payload"})
         else:
-            print(output)
             return jsonify(output)
         
     except KeyError as e:
